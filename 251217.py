@@ -42,3 +42,49 @@ legend_list = df_summary['above_overall_mean'].map({True: "above mean", False: "
 plt.bar(df_summary['batch'],df_summary['mean_value'],  color=colors_list, label=df_summary['batch'])
 plt.axhline(all_mean, color='lightgray', linestyle='--', linewidth=2, label = 'avg.')
 plt.legend()
+
+# 모범답안
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
+
+# data
+data = {
+    "batch": ["B1","B1","B1","B2","B2","B2","B3","B3","B3"],
+    "day":   [1,2,3,1,2,3,1,2,3],
+    "value": [10,12,11,9,11,13,14,13,15]
+}
+df = pd.DataFrame(data)
+
+# 1) summary with groupby (no loops)
+df_summary = (
+    df.groupby("batch", as_index=False)["value"]
+      .mean()
+      .rename(columns={"value": "mean_value"})
+)
+
+# 2) overall mean + flag
+overall_mean = df_summary["mean_value"].mean()
+df_summary["above_overall_mean"] = df_summary["mean_value"] >= overall_mean
+
+# 3) plot (colors + proper legend)
+colors = df_summary["above_overall_mean"].map({True: "blue", False: "gray"})
+
+plt.figure()
+plt.bar(df_summary["batch"], df_summary["mean_value"], color=colors)
+plt.axhline(overall_mean, linestyle="--", linewidth=2, label="Overall mean")
+
+# custom legend for color meaning
+legend_handles = [
+    Patch(label="Above overall mean"),
+    Patch(label="Below overall mean"),
+]
+plt.legend(handles=legend_handles + [plt.Line2D([0], [0], linestyle="--", linewidth=2, label="Overall mean")])
+
+plt.xlabel("batch")
+plt.ylabel("mean_value")
+plt.title("Mean value by batch")
+plt.tight_layout()
+plt.show()
+
+df_summary
